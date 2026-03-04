@@ -1,0 +1,31 @@
+# Python Virtual Environment
+venv/
+.venv/
+env/
+python_env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Models & Weights
+*.h5
+*.keras
+# Optional: keep specific final models but ignore training checkpoints
+# !models/final_mask_detector.keras
+
+# Assets & Data (uncomment if you want to keep data folder private)
+# data/raw/
+# data/processed/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# VS Code / IDE
+.vscode/
+.idea/
