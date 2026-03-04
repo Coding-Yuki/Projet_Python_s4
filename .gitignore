@@ -19,8 +19,8 @@ __pycache__/
 # !models/final_mask_detector.keras
 
 # Assets & Data (uncomment if you want to keep data folder private)
-# data/raw/
-# data/processed/
+data/raw/
+data/processed/
 
 # OS specific files
 .DS_Store
