@@ -33,14 +33,11 @@ from src.config import (
     MIN_DELTA, BEST_MODEL_PATH, FINAL_MODEL_PATH,
     HISTORY_PATH, RAW_DATA_DIR, MODELS_DIR,
 )
-from src.dataset import build_data_pipeline
+from src.dataset import build_data_pipeline, load_file_paths_and_labels
 from src.model import build_mobilenetv2_model, unfreeze_top_layers
 
 # ── Logger ───────────────────────────────────────────────────────────────
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+# NOTE: Do NOT call logging.basicConfig here; main.py configures the root logger.
 logger = logging.getLogger("Trainer")
 
 
@@ -135,6 +132,18 @@ def train(
         data_dir=data_dir, clean=True,
     )
 
+    # ── Compute class weights to handle imbalanced datasets ─────────────
+    from sklearn.utils.class_weight import compute_class_weight
+    _, raw_labels = load_file_paths_and_labels(data_dir)
+    unique_classes = np.unique(raw_labels)
+    weights = compute_class_weight(
+        class_weight="balanced",
+        classes=unique_classes,
+        y=raw_labels,
+    )
+    class_weight_dict = dict(zip(unique_classes.tolist(), weights.tolist()))
+    logger.info(f"Class weights: {class_weight_dict}")
+
     # ── Step 2: Build Model ─────────────────────────────────────────────
     logger.info("\n[PHASE 1] Building MobileNetV2 model...")
     model = build_mobilenetv2_model()
@@ -150,6 +159,7 @@ def train(
         validation_data=val_ds,
         epochs=epochs,
         callbacks=callbacks,
+        class_weight=class_weight_dict,
         verbose=1,
     )
 
@@ -172,6 +182,7 @@ def train(
             validation_data=val_ds,
             epochs=fine_tune_epochs,
             callbacks=ft_callbacks,
+            class_weight=class_weight_dict,
             verbose=1,
         )
 

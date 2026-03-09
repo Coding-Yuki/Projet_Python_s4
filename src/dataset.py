@@ -32,10 +32,7 @@ from src.config import (
 )
 
 # ── Logger Setup ─────────────────────────────────────────────────────────
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+# NOTE: Do NOT call logging.basicConfig here; main.py configures the root logger.
 logger = logging.getLogger("DataPipeline")
 
 

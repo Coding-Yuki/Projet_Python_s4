@@ -31,7 +31,7 @@ from src.config import (
     BEST_MODEL_PATH, FINAL_MODEL_PATH,
     TFLITE_MODEL_PATH, TFLITE_QUANT_PATH,
     MODELS_DIR, PLOTS_DIR, IMG_SIZE,
-    TARGET_MODEL_SIZE_MB,
+    TARGET_MODEL_SIZE_MB, RAW_DATA_DIR, SUPPORTED_EXTENSIONS,
 )
 
 # ── Logger ───────────────────────────────────────────────────────────────
@@ -98,20 +98,45 @@ def convert_to_tflite(
     elif quantize == "int8":
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
-        # Representative dataset for calibration
+        # Representative dataset: use real images for accurate calibration
         if representative_data is None:
-            logger.info("Generating synthetic representative dataset for int8 calibration...")
+            logger.info("Loading real images for int8 calibration from dataset...")
+            image_files = [
+                str(p) for p in Path(RAW_DATA_DIR).rglob("*")
+                if p.suffix.lower() in SUPPORTED_EXTENSIONS
+            ][:200]  # cap at 200 images
+
+            if image_files:
+                sample_imgs = []
+                for fp in image_files:
+                    try:
+                        raw = tf.io.read_file(fp)
+                        img = tf.image.decode_image(raw, channels=3, expand_animations=False)
+                        img = tf.image.resize(img, [IMG_SIZE, IMG_SIZE])
+                        img = tf.cast(img, tf.float32)
+                        img = tf.keras.applications.mobilenet_v2.preprocess_input(img)
+                        sample_imgs.append(img.numpy())
+                    except Exception:
+                        continue
+                representative_data = np.stack(sample_imgs) if sample_imgs else None
+                logger.info(f"Calibration dataset: {len(sample_imgs)} real images loaded.")
+            else:
+                logger.warning("No real images found — falling back to synthetic data.")
+
+        if representative_data is None:
+            logger.info("Using synthetic representative dataset for int8 calibration.")
             representative_data = np.random.randn(100, IMG_SIZE, IMG_SIZE, 3).astype(np.float32)
 
         def representative_dataset():
             for i in range(min(100, len(representative_data))):
-                yield [representative_data[i:i+1]]
+                yield [representative_data[i:i+1].astype(np.float32)]
 
         converter.representative_dataset = representative_dataset
         converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-        converter.inference_input_type = tf.uint8
-        converter.inference_output_type = tf.uint8
-        logger.info("Applied Full Integer (int8) Quantization.")
+        # Use float32 I/O so model runs on any CPU without NNAPI delegate
+        converter.inference_input_type = tf.float32
+        converter.inference_output_type = tf.float32
+        logger.info("Applied Full Integer (int8) Quantization with real-image calibration.")
 
     elif quantize == "none":
         logger.info("No quantization applied (FP32).")

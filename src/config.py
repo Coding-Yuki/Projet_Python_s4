@@ -57,7 +57,7 @@ LABEL_MAP   = {"without_mask": 0, "with_mask": 1}
 
 # ── Performance Targets ──────────────────────────────────────────────────
 TARGET_ACCURACY: float  = 0.95                # >= 95% validation accuracy
-TARGET_FPS: int         = 20                  # >= 20 FPS on standard CPU
+TARGET_FPS: int         = 30                  # >= 30 FPS on standard CPU
 TARGET_MODEL_SIZE_MB    = 10                  # < 10 MB for TFLite
 
 # ── Model Save Paths ────────────────────────────────────────────────────
@@ -66,20 +66,21 @@ FINAL_MODEL_PATH        = MODELS_DIR / "final_mask_detector.keras"
 TFLITE_MODEL_PATH       = MODELS_DIR / "mask_detector.tflite"
 TFLITE_QUANT_PATH       = MODELS_DIR / "mask_detector_int8.tflite"
 HISTORY_PATH            = MODELS_DIR / "training_history.json"
+SCREENSHOTS_DIR         = PROJECT_ROOT / "screenshots"
 
 # ── HUD Color Scheme (BGR for OpenCV) ────────────────────────────────────
 class Colors:
-    """Color palette for the real-time HUD interface."""
-    MASK_GREEN      = (128, 255, 0)           # Neon Green — Mask detected
-    NO_MASK_RED     = (0, 40, 255)            # Scarlet Red — No mask
-    HUD_CYAN        = (200, 255, 0)           # Cyan accent for HUD elements
-    HUD_AMBER       = (0, 200, 255)           # Amber for warnings
-    TEXT_WHITE       = (255, 255, 255)         # Primary text
-    TEXT_GRAY        = (180, 180, 180)         # Secondary text
-    BG_DARK          = (20, 20, 30)            # Overlay background
-    BG_PANEL         = (30, 30, 45)            # Panel background
-    CONFIDENCE_LOW   = (0, 80, 255)            # Red-ish for low confidence
-    CONFIDENCE_HIGH  = (0, 255, 128)           # Green for high confidence
+    """Color palette for the real-time HUD interface (all values are BGR)."""
+    MASK_GREEN      = (0, 255, 128)           # BGR: Neon spring-green — Mask detected
+    NO_MASK_RED     = (0, 40, 255)            # BGR: Scarlet red — No mask
+    HUD_CYAN        = (255, 255, 0)           # BGR: True cyan — HUD accent elements
+    HUD_AMBER       = (0, 165, 255)           # BGR: Orange-amber — warnings
+    TEXT_WHITE      = (255, 255, 255)          # BGR: White — primary text
+    TEXT_GRAY       = (180, 180, 180)          # BGR: Light gray — secondary text
+    BG_DARK         = (20, 20, 30)             # BGR: Near-black navy — overlay background
+    BG_PANEL        = (30, 30, 45)             # BGR: Dark navy — panel background
+    CONFIDENCE_LOW  = (0, 80, 255)             # BGR: Red — low confidence indicator
+    CONFIDENCE_HIGH = (0, 255, 128)            # BGR: Spring-green — high confidence
 
 # ── MediaPipe / Face Detection ───────────────────────────────────────────
 FACE_DETECTION_CONFIDENCE: float = 0.5
@@ -98,7 +99,7 @@ FIGURE_SIZE_CM        = (8, 7)
 for _dir in [
     DATA_DIR, RAW_DATA_DIR, CLEAN_DATA_DIR,
     MODELS_DIR, PLOTS_DIR, ASSETS_DIR,
-    NOTEBOOKS_DIR, REPORT_DIR,
+    NOTEBOOKS_DIR, REPORT_DIR, SCREENSHOTS_DIR,
 ]:
     _dir.mkdir(parents=True, exist_ok=True)
 
