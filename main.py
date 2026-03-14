@@ -1,21 +1,3 @@
-"""
-==========================================================================
-  Mask Detection Pro G11 — Main Entry Point
-==========================================================================
-  CLI interface for all project operations:
-
-    python main.py train        # Train the model
-    python main.py evaluate     # Evaluate and generate reports
-    python main.py export       # Convert to TFLite
-    python main.py run          # Launch real-time detection
-    python main.py all          # Full pipeline (train -> eval -> export)
-    python main.py info         # Show project configuration
-
-  Author  : G11 Team
-  Project : PFE / Master — Face Mask Detection
-==========================================================================
-"""
-
 import sys
 import argparse
 import logging
